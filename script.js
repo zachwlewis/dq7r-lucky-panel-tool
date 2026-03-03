@@ -29,7 +29,7 @@ const LETTER_COLORS = {
   E: "#fb8c00",
   F: "#8e24aa",
   G: "#00acc1",
-  H: "#fdd835",
+  H: "#7cb342",
   I: "#3949ab",
   J: "#00897b",
   K: "#6d4c41",
@@ -62,7 +62,7 @@ const state = {
   generatedLayoutExistsIndex: null,
 };
 
-const sizeSelect = document.getElementById("size-select");
+const difficultyButtonsEl = document.getElementById("difficulty-buttons");
 const layoutSelect = document.getElementById("layout-select");
 const layoutControlEl = document.getElementById("layout-control");
 const boardEl = document.getElementById("board");
@@ -71,8 +71,6 @@ const hotkeyPopupEl = document.getElementById("hotkey-popup");
 const hotkeyPopupTextEl = document.getElementById("hotkey-popup-text");
 const cluePanelEl = document.getElementById("clue-panel");
 const cluePromptEl = document.getElementById("clue-prompt");
-const candidateCountEl = document.getElementById("candidate-count");
-const proposedLayoutLabelEl = document.getElementById("proposed-layout-label");
 const useProposedButton = document.getElementById("use-proposed");
 const clueBackButton = document.getElementById("clue-back");
 const clueRestartButton = document.getElementById("clue-restart");
@@ -171,7 +169,7 @@ function getCellColor(symbol) {
 }
 
 function getCellDisplay(symbol) {
-  if (symbol === "*") return "⭐";
+  if (symbol === "*") return "🌟";
   if (symbol === "!") return "😈";
   return symbol;
 }
@@ -214,16 +212,44 @@ function getValidWildIndexes() {
   return new Set(getOrthogonalNeighbors(state.clues.freeIndex, size.rows, size.cols));
 }
 
-function populateSizeSelect() {
-  sizeSelect.innerHTML = "";
-  for (const sizeId of SIZE_ORDER) {
-    const size = SIZE_CONFIG[sizeId];
-    const option = document.createElement("option");
-    option.value = sizeId;
-    option.textContent = size.label;
-    sizeSelect.append(option);
+function setActiveDifficultyButton() {
+  const buttons = difficultyButtonsEl.querySelectorAll(".difficulty-btn");
+  for (const button of buttons) {
+    const isActive = button.dataset.sizeId === state.sizeId;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
   }
-  sizeSelect.value = state.sizeId;
+}
+
+function populateDifficultyButtons() {
+  difficultyButtonsEl.innerHTML = "";
+  SIZE_ORDER.forEach((sizeId, index) => {
+    const size = SIZE_CONFIG[sizeId];
+    const button = document.createElement("button");
+    const labelParts = size.label.split(" ");
+    button.type = "button";
+    button.className = "difficulty-btn";
+    button.dataset.sizeId = sizeId;
+    button.setAttribute("aria-label", `Difficulty ${size.label} (hotkey ${index + 1})`);
+
+    const hotkey = document.createElement("span");
+    hotkey.className = "hotkey-chip";
+    hotkey.textContent = String(index + 1);
+    button.append(hotkey);
+
+    const text = document.createElement("span");
+    text.textContent = labelParts.join(" ");
+    button.append(text);
+
+    button.addEventListener("click", () => {
+      clearPendingSizeHotkey();
+      applyDifficultyChange(sizeId, true);
+    });
+
+    difficultyButtonsEl.append(button);
+  });
+
+  setActiveDifficultyButton();
 }
 
 function populateLayoutSelect() {
@@ -433,7 +459,7 @@ function loadResolvedBoard(layoutIndex) {
   state.selectedIndex = null;
   state.pendingPairFirstIndex = null;
   state.validSecondPairIndexes = new Set();
-  setMessage(`Using Layout ${layoutIndex + 1}. You can now swap cards.`);
+  clearMessage();
 }
 
 function evaluateCluesAndTransition() {
@@ -667,40 +693,34 @@ async function animateSwap(firstIndex, secondIndex) {
 
 function getPromptText() {
   if (state.phase === "clue_free") {
-    return "1) Where is the Free space?";
+    return "Where is the 🌟 Free space?";
   }
   if (state.phase === "clue_wild") {
-    return "2) Where is the Wild space? (Must be adjacent to Free.)";
+    return "Where is the 😈 Swap/Metal Slime space?";
   }
   if (state.phase === "clue_pair_first") {
-    return "3) Where is one pair? Select first card.";
+    return "Pick Pairs";
   }
   if (state.phase === "clue_pair_second") {
-    return "3) Select adjacent matching card. Click selected card again to cancel.";
+    return "Pick Pairs";
   }
   if (state.phase === "clue_complete") {
-    return "Board is fully specified. Use proposed layout or copy generated layout below.";
+    return "Pick Pairs";
   }
-  return "Layout chosen. You can now swap cards.";
+  return "";
 }
 
 function renderCluePanel() {
   const inCluePhase = state.phase !== "resolved";
   cluePanelEl.hidden = !inCluePhase;
-  layoutControlEl.classList.toggle("layout-hidden", inCluePhase);
+  layoutControlEl.classList.add("layout-hidden");
 
   if (!inCluePhase) {
+    cluePromptEl.textContent = "";
     return;
   }
 
   cluePromptEl.textContent = getPromptText();
-  candidateCountEl.textContent = `Candidate layouts: ${state.candidateLayoutIndexes.length}`;
-
-  if (state.proposedLayoutIndex === null) {
-    proposedLayoutLabelEl.textContent = "Proposed layout: none";
-  } else {
-    proposedLayoutLabelEl.textContent = `Proposed layout: Layout ${state.proposedLayoutIndex + 1}`;
-  }
 
   useProposedButton.disabled = state.proposedLayoutIndex === null;
   clueBackButton.disabled = state.clueHistory.length === 0;
@@ -880,9 +900,17 @@ function onUseProposedLayout() {
   render();
 }
 
-function onSizeChange() {
-  clearPendingSizeHotkey();
-  state.sizeId = sizeSelect.value;
+function applyDifficultyChange(targetSizeId, restartIfSame) {
+  if (!targetSizeId) {
+    return;
+  }
+
+  if (!restartIfSame && state.sizeId === targetSizeId) {
+    return;
+  }
+
+  state.sizeId = targetSizeId;
+  setActiveDifficultyButton();
   clearMessage();
   startClueSession();
 }
@@ -958,10 +986,7 @@ function onGlobalKeydown(event) {
 
   if (state.pendingSizeHotkey === key) {
     clearPendingSizeHotkey();
-    state.sizeId = targetSizeId;
-    sizeSelect.value = targetSizeId;
-    clearMessage();
-    startClueSession();
+    applyDifficultyChange(targetSizeId, true);
     return;
   }
 
@@ -982,11 +1007,9 @@ function onGlobalKeydown(event) {
 }
 
 function init() {
-  populateSizeSelect();
+  populateDifficultyButtons();
   startClueSession();
 
-  sizeSelect.addEventListener("change", onSizeChange);
-  layoutSelect.addEventListener("change", onLayoutChange);
   useProposedButton.addEventListener("click", onUseProposedLayout);
   clueBackButton.addEventListener("click", undoLastClue);
   clueRestartButton.addEventListener("click", onRestartClues);

@@ -4,22 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lucky Panel Tool</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app">
       <header class="app-header">
         <h1>Lucky Panel Tool</h1>
-        <p>Select a size and layout, click two cards to swap, or press 1-4 to change board size.</p>
+        <p>Choose a difficulty and pick cards to identify the layout. Hotkeys 1-4 also switch difficulty.</p>
       </header>
 
       <section class="controls" aria-label="Board controls">
-        <label class="control">
+        <div class="control control-inline">
           <span>Difficulty</span>
-          <select id="size-select" aria-label="Select difficulty"></select>
-        </label>
+          <div id="difficulty-buttons" class="difficulty-buttons" role="group" aria-label="Select difficulty"></div>
+        </div>
 
-        <label id="layout-control" class="control">
+        <label id="layout-control" class="control layout-hidden">
           <span>Layout</span>
           <select id="layout-select" aria-label="Select layout"></select>
         </label>
@@ -27,13 +28,13 @@
 
       <p id="message" class="message" role="status" aria-live="polite"></p>
       <section id="clue-panel" class="clue-panel" aria-live="polite">
-        <p id="clue-prompt" class="clue-prompt"></p>
-        <p id="candidate-count" class="candidate-count"></p>
-        <p id="proposed-layout-label" class="proposed-layout-label"></p>
-        <div class="clue-actions">
-          <button id="use-proposed" type="button">Use proposed layout</button>
-          <button id="clue-back" type="button">Back</button>
-          <button id="clue-restart" type="button">Restart clues</button>
+        <div class="clue-inline">
+          <p id="clue-prompt" class="clue-prompt"></p>
+          <div class="clue-actions">
+            <button id="use-proposed" type="button">Confirm</button>
+            <button id="clue-back" type="button">Back</button>
+            <button id="clue-restart" type="button">Reset</button>
+          </div>
         </div>
         <pre id="generated-layout" class="generated-layout" hidden></pre>
       </section>
@@ -45,6 +46,10 @@
       <div id="hotkey-popup" class="hotkey-popup" role="alertdialog" aria-live="assertive" aria-hidden="true">
         <p id="hotkey-popup-text"></p>
       </div>
+
+      <footer class="app-footer">
+        A <a href="https://zacharylew.is" target="_blank" rel="noopener noreferrer">Zachary Lewis</a> Joint.
+      </footer>
     </main>
 
     <script src="script.js"></script>
