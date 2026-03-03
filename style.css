@@ -1,0 +1,324 @@
+:root {
+  --bg: radial-gradient(circle at 15% 15%, #fff6de 0%, #f7e8cb 48%, #eedab3 100%);
+  --panel: #fffaf0;
+  --panel-border: #d6c5a1;
+  --text: #3c2f1e;
+  --muted: #6c5d45;
+  --focus: #2b6cb0;
+  --gap: 0.55rem;
+  --radius: 0.95rem;
+  --shadow: 0 16px 34px rgba(54, 39, 14, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+
+.app {
+  width: min(100%, 900px);
+  height: calc(100vh - 1.5rem);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+.app-header p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.control {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 140px;
+}
+
+.control span {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+select {
+  border: 1px solid #b99d69;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  color: inherit;
+  background: #fffdf6;
+}
+
+.message {
+  min-height: 1.2rem;
+  margin: 0.4rem 0;
+  color: #8f2a22;
+  font-size: 0.93rem;
+}
+
+.clue-panel {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.45rem;
+}
+
+.clue-prompt {
+  margin: 0;
+  font-weight: 700;
+  color: #3b4e66;
+}
+
+.candidate-count {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5a6f87;
+}
+
+.proposed-layout-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #35577c;
+}
+
+.clue-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.clue-actions button {
+  border: 1px solid #9bb3cd;
+  border-radius: 0.45rem;
+  background: #f5f9ff;
+  color: #2c4560;
+  padding: 0.38rem 0.65rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.clue-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.generated-layout {
+  margin: 0.3rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #bbcad8;
+  border-radius: 0.45rem;
+  background: #f5f8fc;
+  color: #28415d;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.layout-hidden {
+  display: none;
+}
+
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.hotkey-popup {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%) translateY(14px);
+  opacity: 0;
+  pointer-events: none;
+  background: #1f2f43;
+  color: #f4f8ff;
+  border: 1px solid #4a6583;
+  border-radius: 0.7rem;
+  box-shadow: 0 10px 24px rgba(8, 18, 31, 0.32);
+  padding: 0.7rem 0.95rem;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  z-index: 20;
+}
+
+.hotkey-popup p {
+  margin: 0;
+  font-size: 0.93rem;
+  white-space: nowrap;
+}
+
+.hotkey-popup.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: var(--grid-template, repeat(4, minmax(56px, 56px)));
+  grid-auto-rows: var(--card-size, 56px);
+  gap: var(--gap);
+  justify-content: center;
+  align-content: center;
+  width: max-content;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.card {
+  position: relative;
+  border: 1px solid #ddd3bf;
+  border-radius: var(--radius);
+  width: var(--card-size, 56px);
+  height: var(--card-size, 56px);
+  font:
+    700 clamp(1.5rem, 3.1vw, 2.2rem) "Trebuchet MS",
+    "Avenir Next",
+    sans-serif;
+  color: var(--card-color, #36516a);
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 3px rgba(43, 30, 9, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 0;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.proposed-icon {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  min-width: 1.35em;
+  height: 1.35em;
+  padding: 0 0.24em;
+  border-radius: 999px;
+  border: 1px solid var(--proposed-color, #5b7693);
+  background: color-mix(in srgb, var(--proposed-color, #5b7693) 14%, #ffffff 86%);
+  color: var(--proposed-color, #35577c);
+  font-size: clamp(0.62rem, 1.35vw, 0.9rem);
+  line-height: 1.1em;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: calc(var(--radius) - 0.22rem);
+  border: 3px solid var(--card-color, #36516a);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 4px 12px rgba(43, 30, 9, 0.18);
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.card.selected {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 5px 12px rgba(43, 30, 9, 0.22);
+}
+
+.card.selected::before {
+  filter: brightness(0.84);
+}
+
+.card.wild {
+  --card-color: #7d4ce0;
+  color: #ffffff;
+}
+
+.card.free {
+  --card-color: #ffcb20;
+  color: #ffcb20;
+}
+
+.card.wild::before,
+.card.free::before {
+  border: none;
+  background: var(--card-color);
+}
+
+.card.facedown {
+  --card-color: #8ba0b8;
+  color: #8ba0b8;
+}
+
+.card.facedown::before {
+  border-color: #8ba0b8;
+}
+
+.card.pair-clue {
+  --card-color: #2f7b73;
+  color: #2f7b73;
+}
+
+.card.valid-target {
+  box-shadow:
+    0 0 0 2px #2f7b73,
+    0 1px 3px rgba(43, 30, 9, 0.12);
+}
+
+.card.blocked {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 1rem;
+  }
+
+  .controls {
+    gap: 0.6rem;
+  }
+
+  .control {
+    min-width: 120px;
+  }
+}

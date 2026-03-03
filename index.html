@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lucky Panel Tool</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <h1>Lucky Panel Tool</h1>
+        <p>Select a size and layout, click two cards to swap, or press 1-4 to change board size.</p>
+      </header>
+
+      <section class="controls" aria-label="Board controls">
+        <label class="control">
+          <span>Difficulty</span>
+          <select id="size-select" aria-label="Select difficulty"></select>
+        </label>
+
+        <label id="layout-control" class="control">
+          <span>Layout</span>
+          <select id="layout-select" aria-label="Select layout"></select>
+        </label>
+      </section>
+
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+      <section id="clue-panel" class="clue-panel" aria-live="polite">
+        <p id="clue-prompt" class="clue-prompt"></p>
+        <p id="candidate-count" class="candidate-count"></p>
+        <p id="proposed-layout-label" class="proposed-layout-label"></p>
+        <div class="clue-actions">
+          <button id="use-proposed" type="button">Use proposed layout</button>
+          <button id="clue-back" type="button">Back</button>
+          <button id="clue-restart" type="button">Restart clues</button>
+        </div>
+        <pre id="generated-layout" class="generated-layout" hidden></pre>
+      </section>
+
+      <section class="board-wrap">
+        <div id="board" class="board" aria-label="Card board"></div>
+      </section>
+
+      <div id="hotkey-popup" class="hotkey-popup" role="alertdialog" aria-live="assertive" aria-hidden="true">
+        <p id="hotkey-popup-text"></p>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
