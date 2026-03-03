@@ -722,7 +722,7 @@ function renderCluePanel() {
 
   cluePromptEl.textContent = getPromptText();
 
-  useProposedButton.disabled = state.proposedLayoutIndex === null;
+  useProposedButton.disabled = !(state.proposedLayoutIndex !== null && state.candidateLayoutIndexes.length === 1);
   clueBackButton.disabled = state.clueHistory.length === 0;
 
   generatedLayoutEl.hidden = state.generatedLayoutText === "";
